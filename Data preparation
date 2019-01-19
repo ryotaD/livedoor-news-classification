@@ -1,0 +1,36 @@
+import glob
+import re
+import MeCab
+import pandas as pd
+
+categories = ["sports-watch", "topic-news", "dokujo-tsushin", "peachy",
+    "movie-enter", "kaden-channel", "livedoor-homme", "smax", "it-life-hack"]
+
+docs = []
+for category in categories:
+    for f in glob.glob(f"./text/{category}/{category}*.txt"):
+        with open(f, "r",encoding='utf-8') as fin:
+            url = next(fin).strip()
+            date = next(fin).strip()
+            title = next(fin).strip()
+            body = "\n".join([line.strip() for line in fin if line.strip()])      
+        docs.append((category, url, date, title, body))
+        
+df = pd.DataFrame(
+        docs,
+        columns=["category", "url", "date", "title", "body"],
+        dtype="category")
+
+df=df.drop(['url','date','title'],axis=1)
+def labeling(category):
+    categories = [
+    "sports-watch", "topic-news", "dokujo-tsushin", "peachy",
+    "movie-enter", "kaden-channel", "livedoor-homme", "smax",
+    "it-life-hack"]
+    label = categories.index(category)
+    return label
+
+for index, category in enumerate(df['category']):
+    df.at[index, 'label'] = labeling(category)
+
+classification_df = df.drop('category',axis=1)
